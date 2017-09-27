@@ -41,12 +41,20 @@ class FSM {
      * Changes state according to event transition rules.
      * @param event
      */
-    trigger(event) {}
+    trigger(event) {
+        this.previ = this.state;
+        if (this.states[this.state].transitions[event]){          this.changeState(this.states[this.state].transitions[event])
+        }else{
+            throw new Error('event in current state isn\'t exist');
+        }
+    }
 
     /**
      * Resets FSM state to initial.
      */
-    reset() {}
+    reset() {
+        this.current = config.initial;
+    }
 
     /**
      * Returns an array of states for which there are specified event transition rules.
@@ -54,14 +62,28 @@ class FSM {
      * @param event
      * @returns {Array}
      */
-    getStates(event) {}
+    getStates(event) {
+        if (!event){
+            return ['normal', 'busy', 'hungry', 'sleeping'];
+        } else{
+        var states = [];
+        for (var key in this.states){
+            if (this.states[key].transitions[event]){
+                states.push(key);
+            }
+        }
+            return states;
+        }       
+    }
 
     /**
      * Goes back to previous state.
      * Returns false if undo is not available.
      * @returns {Boolean}
      */
-    undo() {}
+    undo() {
+        
+    }
 
     /**
      * Goes redo to state.
