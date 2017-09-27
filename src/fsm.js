@@ -6,11 +6,13 @@ class FSM {
     constructor(config) {
         //throws an exception if config isn\'t passed
         if(!config){
-            throw new Error('!config');
+            throw new Error('config isn\'t passed');
         }
     this.config = config.initial;
-    this.current = this.config;
+    this.state = this.config;
     this.states = config.states;
+    this.previ = null;
+    this.history = null;
     }    
 
     /**
@@ -19,20 +21,21 @@ class FSM {
      */
     getState() {
         //returns initial state after creation
-        return this.current;
+        return this.state;
     }
 
     /**
      * Goes to specified state.
-     * @param state
+     * @param state meyhods
      */
     changeState(state) {
      //changes state
     //throws an exception if state isn\'t exist
+        this.previ = this.state;
         if(this.states[state]){
             this.state = state;
         }else{
-            throw new Error('!state');
+            throw new Error('state isn\'t exist');
         }
         
     }
@@ -41,21 +44,18 @@ class FSM {
      * Changes state according to event transition rules.
      * @param event
      */
-    trigger(event) {
-        this.previ = this.state;
+    trigger(event) {        
         if (this.states[this.state].transitions[event]){          this.changeState(this.states[this.state].transitions[event])
         }else{
             throw new Error('event in current state isn\'t exist');
         }
     }
-
     /**
      * Resets FSM state to initial.
      */
     reset() {
-        this.current = config.initial;
+        this.state = this.config;        
     }
-
     /**
      * Returns an array of states for which there are specified event transition rules.
      * Returns all states if argument is undefined.
@@ -64,7 +64,7 @@ class FSM {
      */
     getStates(event) {
         if (!event){
-            return ['normal', 'busy', 'hungry', 'sleeping'];
+            return Object.keys(this.states);
         } else{
         var states = [];
         for (var key in this.states){
@@ -75,29 +75,42 @@ class FSM {
             return states;
         }       
     }
-
     /**
      * Goes back to previous state.
      * Returns false if undo is not available.
      * @returns {Boolean}
      */
     undo() {
-        
+        if(this.previ){
+            this.history = this.state;
+            this.state = this.previ;
+            this.previ = null;
+            return true;
+        }else{
+            return false;
+        }
     }
-
     /**
      * Goes redo to state.
      * Returns false if redo is not available.
      * @returns {Boolean}
      */
-    redo() {}
-
+    redo() {
+       if (this.history) {
+           this.previ = this.state;
+           this.state = this.history;
+           this.history = null;
+           return true;
+       }else {
+           return false;
+       }
+    }
     /**
      * Clears transition history
      */
-    clearHistory() {}
+    clearHistory() {
+        this.previ = null;
+    }
 }
-
 module.exports = FSM;
-
 /** @Created by Uladzimir Halushka **/
